@@ -186,41 +186,29 @@ export type Styles = {
 	readonly borderStyle?: keyof Boxes | BoxStyle;
 
 	/**
-	Title to display in the top border.
-	*/
-	readonly borderTitle?: string;
-
-	/**
-	Alignment of the border title.
-
-	@default 'left'
-	*/
-	readonly borderTitleAlignment?: 'left' | 'center' | 'right';
-
-	/**
 	Determines whether the top border is visible.
-
+	
 	@default true
 	*/
 	readonly borderTop?: boolean;
 
 	/**
 	Determines whether the bottom border is visible.
-
+	
 	@default true
 	*/
 	readonly borderBottom?: boolean;
 
 	/**
 	Determines whether the left border is visible.
-
+	
 	@default true
 	*/
 	readonly borderLeft?: boolean;
 
 	/**
 	Determines whether the right border is visible.
-
+	
 	@default true
 	*/
 	readonly borderRight?: boolean;
@@ -259,35 +247,35 @@ export type Styles = {
 
 	/**
 	Dim the top border color.
-
+	
 	@default false
 	*/
 	readonly borderTopDimColor?: boolean;
 
 	/**
 	Dim the bottom border color.
-
+	
 	@default false
 	*/
 	readonly borderBottomDimColor?: boolean;
 
 	/**
 	Dim the left border color.
-
+	
 	@default false
 	*/
 	readonly borderLeftDimColor?: boolean;
 
 	/**
 	Dim the right border color.
-
+	
 	@default false
 	*/
 	readonly borderRightDimColor?: boolean;
 
 	/**
 	Behavior for an element's overflow in both directions.
-
+	
 	@default 'visible'
 	*/
 	readonly overflow?: 'visible' | 'hidden';
@@ -308,7 +296,7 @@ export type Styles = {
 
 	/**
 	Background color for the element.
-
+	
 	Accepts the same values as `color` in the `<Text>` component.
 	*/
 	readonly backgroundColor?: LiteralUnion<ForegroundColorName, string>;

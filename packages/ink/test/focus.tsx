@@ -107,7 +107,7 @@ function Item({label, autoFocus, disabled = false}: ItemProps) {
 	);
 }
 
-test('dont focus on register when auto focus is off', async t => {
+test('do not focus on register when auto focus is off', async t => {
 	const stdout = createStdout();
 	const stdin = createStdin();
 	render(<Test />, {
@@ -116,7 +116,7 @@ test('dont focus on register when auto focus is off', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -133,7 +133,7 @@ test('focus the first component to register', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -150,9 +150,9 @@ test('unfocus active component on Esc', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\u001B');
-	await delay(100);
+	await delay(50);
 	t.is(
 		(stdout.write as any).lastCall.args[0],
 		['First', 'Second', 'Third'].join('\n'),
@@ -168,9 +168,9 @@ test('switch focus to first component on Tab', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -187,10 +187,10 @@ test('switch focus to the next component on Tab', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\t');
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -207,10 +207,10 @@ test('switch focus to the first component if currently focused component is the 
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\t');
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -218,7 +218,7 @@ test('switch focus to the first component if currently focused component is the 
 	);
 
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -235,9 +235,9 @@ test('skip disabled component on Tab', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -254,9 +254,9 @@ test('switch focus to the previous component on Shift+Tab', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -264,7 +264,7 @@ test('switch focus to the previous component on Shift+Tab', async t => {
 	);
 
 	emitReadable(stdin, '\u001B[Z');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -281,9 +281,9 @@ test('switch focus to the last component if currently focused component is the f
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\u001B[Z');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -300,10 +300,10 @@ test('skip disabled component on Shift+Tab', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\u001B[Z');
 	emitReadable(stdin, '\u001B[Z');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -320,9 +320,9 @@ test('reset focus when focused component unregisters', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	rerender(<Test autoFocus showFirst={false} />);
-	await delay(100);
+	await delay(50);
 
 	t.is((stdout.write as any).lastCall.args[0], ['Second', 'Third'].join('\n'));
 });
@@ -336,14 +336,14 @@ test('focus first component after focused component unregisters', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	rerender(<Test autoFocus showFirst={false} />);
-	await delay(100);
+	await delay(50);
 
 	t.is((stdout.write as any).lastCall.args[0], ['Second', 'Third'].join('\n'));
 
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -360,11 +360,11 @@ test('toggle focus management', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	rerender(<Test autoFocus disabled />);
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -372,9 +372,9 @@ test('toggle focus management', async t => {
 	);
 
 	rerender(<Test autoFocus />);
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -391,9 +391,9 @@ test('manually focus next component', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	rerender(<Test autoFocus focusNext />);
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -410,9 +410,9 @@ test('manually focus previous component', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	rerender(<Test autoFocus focusPrevious />);
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -420,7 +420,7 @@ test('manually focus previous component', async t => {
 	);
 });
 
-test('doesnt crash when focusing next on unmounted children', async t => {
+test('does not crash when focusing next on unmounted children', async t => {
 	const stdout = createStdout();
 	const stdin = createStdin();
 	const {rerender} = render(<Test autoFocus />, {
@@ -429,14 +429,14 @@ test('doesnt crash when focusing next on unmounted children', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	rerender(<Test focusNext unmountChildren />);
-	await delay(100);
+	await delay(50);
 
 	t.is((stdout.write as any).lastCall.args[0], '');
 });
 
-test('doesnt crash when focusing previous on unmounted children', async t => {
+test('does not crash when focusing previous on unmounted children', async t => {
 	const stdout = createStdout();
 	const stdin = createStdin();
 	const {rerender} = render(<Test autoFocus />, {
@@ -445,9 +445,9 @@ test('doesnt crash when focusing previous on unmounted children', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	rerender(<Test focusPrevious unmountChildren />);
-	await delay(100);
+	await delay(50);
 
 	t.is((stdout.write as any).lastCall.args[0], '');
 });
@@ -461,7 +461,7 @@ test('focuses first non-disabled component', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -478,11 +478,11 @@ test('skips disabled elements when wrapping around', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\t');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
@@ -499,12 +499,59 @@ test('skips disabled elements when wrapping around from the front', async t => {
 		debug: true,
 	});
 
-	await delay(100);
+	await delay(50);
 	emitReadable(stdin, '\u001B[Z');
-	await delay(100);
+	await delay(50);
 
 	t.is(
 		(stdout.write as any).lastCall.args[0],
 		['First', 'Second ✔', 'Third'].join('\n'),
+	);
+});
+
+// Concurrent mode tests
+// Note: Focus tests with stdin interaction are complex to migrate.
+// These tests verify basic concurrent rendering with focus components.
+test('focus component renders in concurrent mode', async t => {
+	const stdout = createStdout();
+	const stdin = createStdin();
+	const {act} = await import('react');
+
+	await act(async () => {
+		render(<Test />, {
+			stdout,
+			stdin,
+			debug: true,
+			concurrent: true,
+		});
+	});
+
+	await delay(50);
+
+	t.is(
+		(stdout.write as any).lastCall.args[0],
+		['First', 'Second', 'Third'].join('\n'),
+	);
+});
+
+test('focus component with autoFocus renders in concurrent mode', async t => {
+	const stdout = createStdout();
+	const stdin = createStdin();
+	const {act} = await import('react');
+
+	await act(async () => {
+		render(<Test autoFocus />, {
+			stdout,
+			stdin,
+			debug: true,
+			concurrent: true,
+		});
+	});
+
+	await delay(50);
+
+	t.is(
+		(stdout.write as any).lastCall.args[0],
+		['First ✔', 'Second', 'Third'].join('\n'),
 	);
 });

@@ -1,9 +1,9 @@
-import process from 'node:process';
 import createReconciler, {type ReactContext} from 'react-reconciler';
 import {
 	DefaultEventPriority,
 	NoEventPriority,
 } from 'react-reconciler/constants.js';
+import * as Scheduler from 'scheduler';
 import Yoga, {type Node as YogaNode} from 'yoga-layout';
 import {createContext} from 'react';
 import {
@@ -22,11 +22,12 @@ import {
 } from './dom.js';
 import applyStyles, {type Styles} from './styles.js';
 import {type OutputTransformer} from './render-node-to-output.js';
+import {isDev} from './utils.js';
 
 // We need to conditionally perform devtools connection to avoid
 // accidentally breaking other third-party code.
 // See https://github.com/vadimdemedes/ink/issues/384
-if (process.env['DEV'] === 'true') {
+if (isDev()) {
 	try {
 		await import('./devtools.js');
 	} catch (error: any) {
@@ -97,6 +98,19 @@ type HostContext = {
 let currentUpdatePriority = NoEventPriority;
 
 let currentRootNode: DOMElement | undefined;
+
+async function loadPackageJson() {
+	const fs = await import('node:fs');
+	const content = fs.readFileSync(
+		new URL('../package.json', import.meta.url),
+		'utf8',
+	);
+	return JSON.parse(content) as {name: string; version: string};
+}
+
+const packageJson = isDev()
+	? await loadPackageJson()
+	: {name: undefined, version: undefined};
 
 export default createReconciler<
 	ElementNames,
@@ -233,6 +247,14 @@ export default createReconciler<
 	supportsMutation: true,
 	supportsPersistence: false,
 	supportsHydration: false,
+	// Scheduler integration for concurrent mode
+	supportsMicrotasks: true,
+	scheduleMicrotask: queueMicrotask,
+	// @ts-expect-error @types/react-reconciler is outdated and doesn't include scheduleCallback
+	scheduleCallback: Scheduler.unstable_scheduleCallback,
+	cancelCallback: Scheduler.unstable_cancelCallback,
+	shouldYield: Scheduler.unstable_shouldYield,
+	now: Scheduler.unstable_now,
 	scheduleTimeout: setTimeout,
 	cancelTimeout: clearTimeout,
 	noTimeout: -1,
@@ -308,7 +330,8 @@ export default createReconciler<
 		return DefaultEventPriority;
 	},
 	maySuspendCommit() {
-		return false;
+		// Return true to enable Suspense resource preloading
+		return true;
 	},
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	NotPendingTransition: undefined,
@@ -336,4 +359,6 @@ export default createReconciler<
 	waitForCommitToBeReady() {
 		return null;
 	},
+	rendererPackageName: packageJson.name,
+	rendererVersion: packageJson.version,
 });

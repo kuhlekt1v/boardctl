@@ -22,8 +22,19 @@ export default function App() {
 			type: OVERLAY_TYPE.DETAIL,
 			id: 'overlay',
 			component: CardDetails,
-			height: 50,
+			height: 95,
 			width: 50,
+			background: false,
+		},
+
+		{
+			isOpen: focusState.helpMenuOpen,
+			type: OVERLAY_TYPE.HELP,
+			id: 'help-menu',
+			component: HelpMenu,
+			height: 95,
+			width: 50,
+			background: false,
 		},
 		{
 			isOpen: focusState.quitPromptOpen,
@@ -32,15 +43,6 @@ export default function App() {
 			component: QuitPrompt,
 			height: 20,
 			width: 35,
-			background: false,
-		},
-		{
-			isOpen: focusState.helpMenuOpen,
-			type: OVERLAY_TYPE.HELP,
-			id: 'help-menu',
-			component: HelpMenu,
-			height: 95,
-			width: 50,
 			background: false,
 		},
 	];

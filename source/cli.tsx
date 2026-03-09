@@ -1,5 +1,5 @@
 import {Box, render, Text} from 'ink';
-import App from './App.js';
+import App from './app.js';
 import {bootstrap} from './bootstrap.js';
 import {DebugProvider} from './context/DebugContext.js';
 import {FocusProvider} from './context/FocusContext.js';

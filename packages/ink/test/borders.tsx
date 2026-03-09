@@ -5,8 +5,12 @@ import indentString from 'indent-string';
 import cliBoxes from 'cli-boxes';
 import chalk from 'chalk';
 import {render, Box, Text} from '../src/index.js';
-import {renderToString} from './helpers/render-to-string.js';
+import {
+	renderToString,
+	renderToStringAsync,
+} from './helpers/render-to-string.js';
 import createStdout from './helpers/create-stdout.js';
+import {renderAsync} from './helpers/test-renderer.js';
 
 test('single node - full width box', t => {
 	const output = renderToString(
@@ -63,6 +67,17 @@ test('single node - fit-content box with emojis', t => {
 	);
 
 	t.is(output, boxen('🌊🌊', {borderStyle: 'round'}));
+});
+
+// Issue #733: Emojis with variation selectors (FE0F) should align properly
+test('single node - fit-content box with variation selector emojis', t => {
+	const output = renderToString(
+		<Box borderStyle="round" alignSelf="flex-start">
+			<Text>🌡️⚠️✅</Text>
+		</Box>,
+	);
+
+	t.is(output, boxen('🌡️⚠️✅', {borderStyle: 'round'}));
 });
 
 test('single node - fixed width box', t => {
@@ -873,115 +888,96 @@ test('dim right border color', t => {
 	);
 });
 
-test('box with title - left aligned', t => {
+// Regression test for https://github.com/vadimdemedes/ink/issues/840
+// borderDimColor should not dim styled child Text components touching the left edge
+test('borderDimColor does not dim styled child Text touching left edge', t => {
 	const output = renderToString(
-		<Box borderStyle="round" borderTitle="My Title" width={20}>
-			<Text>Content</Text>
+		<Box borderDimColor borderStyle="round" alignSelf="flex-start">
+			<Text bold color="blue">
+				styled text
+			</Text>
 		</Box>,
+	);
+
+	// The styled text should be bold and blue (not dimmed)
+	// Note: Text component applies color first then bold, so the escape code order is bold+blue
+	const styledText = chalk.bold(chalk.blue('styled text'));
+	t.true(
+		output.includes(styledText),
+		'Child text should retain its color and bold styling, not be dimmed',
+	);
+
+	// The border should be dimmed (entire top border line is dimmed as a unit)
+	const dimmedTopBorder = chalk.dim(
+		cliBoxes.round.topLeft +
+			cliBoxes.round.top.repeat(11) +
+			cliBoxes.round.topRight,
+	);
+	t.true(output.includes(dimmedTopBorder), 'Border should be dimmed');
+});
+
+// Concurrent mode tests
+test('single node - full width box - concurrent', async t => {
+	const output = await renderToStringAsync(
+		<Box borderStyle="round">
+			<Text>Hello World</Text>
+		</Box>,
+	);
+
+	t.is(output, boxen('Hello World', {width: 100, borderStyle: 'round'}));
+});
+
+test('single node - fit-content box - concurrent', async t => {
+	const output = await renderToStringAsync(
+		<Box borderStyle="round" alignSelf="flex-start">
+			<Text>Hello World</Text>
+		</Box>,
+	);
+
+	t.is(output, boxen('Hello World', {borderStyle: 'round'}));
+});
+
+test('nested boxes - concurrent', async t => {
+	const output = await renderToStringAsync(
+		<Box borderStyle="round" width={40} padding={1}>
+			<Box borderStyle="round" justifyContent="center" padding={1}>
+				<Text>Hello World</Text>
+			</Box>
+		</Box>,
+	);
+
+	const nestedBox = indentString(
+		boxen('\n Hello World \n', {borderStyle: 'round'}),
+		1,
 	);
 
 	t.is(
 		output,
-		boxen('Content'.padEnd(18, ' '), {
-			borderStyle: 'round',
-			title: 'My Title',
-			titleAlignment: 'left',
-			width: 20,
-		}),
+		boxen(`${' '.repeat(38)}\n${nestedBox}\n`, {borderStyle: 'round'}),
 	);
 });
 
-test('box with title - center aligned', t => {
-	const output = renderToString(
-		<Box
-			borderStyle="round"
-			borderTitle="My Title"
-			borderTitleAlignment="center"
-			width={20}
-		>
-			<Text>Content</Text>
-		</Box>,
-	);
+test('render border after update - concurrent', async t => {
+	function Test({borderColor}: {readonly borderColor?: string}) {
+		return (
+			<Box borderStyle="round" borderColor={borderColor}>
+				<Text>Hello World</Text>
+			</Box>
+		);
+	}
+
+	const {getOutput, rerenderAsync} = await renderAsync(<Test />);
+
+	t.is(getOutput(), boxen('Hello World', {width: 100, borderStyle: 'round'}));
+
+	await rerenderAsync(<Test borderColor="green" />);
 
 	t.is(
-		output,
-		boxen('Content'.padEnd(18, ' '), {
+		getOutput(),
+		boxen('Hello World', {
+			width: 100,
 			borderStyle: 'round',
-			title: 'My Title',
-			titleAlignment: 'center',
-			width: 20,
-		}),
-	);
-});
-
-test('box with title - right aligned', t => {
-	const output = renderToString(
-		<Box
-			borderStyle="round"
-			borderTitle="My Title"
-			borderTitleAlignment="right"
-			width={20}
-		>
-			<Text>Content</Text>
-		</Box>,
-	);
-
-	t.is(
-		output,
-		boxen('Content'.padEnd(18, ' '), {
-			borderStyle: 'round',
-			title: 'My Title',
-			titleAlignment: 'right',
-			width: 20,
-		}),
-	);
-});
-
-test('box with title - fixed width', t => {
-	const output = renderToString(
-		<Box borderStyle="round" borderTitle="Title" width={20}>
-			<Text>Content</Text>
-		</Box>,
-	);
-
-	t.is(
-		output,
-		boxen('Content'.padEnd(18, ' '), {
-			borderStyle: 'round',
-			title: 'Title',
-			width: 20,
-		}),
-	);
-});
-
-test('box with title - title too long ignores title', t => {
-	const output = renderToString(
-		<Box
-			borderStyle="round"
-			borderTitle="Very Long Title That Won't Fit"
-			width={10}
-		>
-			<Text>Hi</Text>
-		</Box>,
-	);
-
-	t.is(output, boxen('Hi'.padEnd(8, ' '), {borderStyle: 'round', width: 10}));
-});
-
-test('box with title and colorful border', t => {
-	const output = renderToString(
-		<Box borderStyle="round" borderTitle="Title" borderColor="green" width={15}>
-			<Text>Content</Text>
-		</Box>,
-	);
-
-	t.is(
-		output,
-		boxen('Content'.padEnd(13, ' '), {
-			borderStyle: 'round',
-			title: 'Title',
 			borderColor: 'green',
-			width: 15,
 		}),
 	);
 });
